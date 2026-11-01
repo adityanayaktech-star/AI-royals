@@ -3,6 +3,7 @@ import numpy as np
 import torch, torch.nn as nn, torch.nn.functional as F
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from matplotlib import cm
 from PIL import Image, UnidentifiedImageError
 from torchvision import models, transforms
@@ -74,6 +75,14 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"],
                    allow_methods=["*"], allow_headers=["*"])
 
 
+@app.get("/")
+def index():
+    html_path = os.path.join(HERE, "retinal-screening.html")
+    if os.path.exists(html_path):
+        return FileResponse(html_path)
+    return {"message": "RetinaAI API is running. Access /docs for API documentation."}
+
+
 @app.get("/health")
 def health():
     return {"status": "ok"}
@@ -99,3 +108,10 @@ def predict(file: UploadFile = File(...)):
         "probabilities": {CLASSES[i]: round(float(p[i]), 4) for i in np.argsort(-p)},
         "heatmap": overlay_b64(img, cam),
     }
+
+
+if __name__ == "__main__":
+    import uvicorn
+    app_dir = os.path.dirname(os.path.abspath(__file__))
+    print(f"Starting RetinaAI server at http://127.0.0.1:8001 ...")
+    uvicorn.run("main:app", host="127.0.0.1", port=8001, reload=True, app_dir=app_dir)

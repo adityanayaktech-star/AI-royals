@@ -91,7 +91,7 @@ def overlay_b64(img, cam):
 
 app = FastAPI(title="RetinaAI API", version="1.0")
 app.add_middleware(CORSMiddleware, allow_origins=ALLOWED_ORIGINS,
-                   allow_methods=["POST", "GET"], allow_headers=["*"])
+    allow_methods=["POST","GET","OPTIONS"], allow_headers=["*"])
 
 
 def check_auth(authorization: str | None = Header(default=None)):
